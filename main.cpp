@@ -2,6 +2,11 @@
 using namespace std;
 
 typedef   set<array<int,2>> region;
+typedef set<region> List;
+
+
+
+List nodeList;
 int **a;
 int size;
 
@@ -30,15 +35,21 @@ void print_table(int size)
         cout<<"\n";
     }
 }
-
-region find_tile(region &node,set<int>&color, int x, int y, int prevC)
+//finds number of covered tiles
+region find_tile(region &node, int x, int y, int prevC)
 {
     //cout<<x<<" "<<y<<"\n";
 
-    if (x < 0 || x >= size || y < 0 || y >= size)return node;
+
+    if (x < 0 || x >= size || y < 0 || y >= size || a[x][y]==-1)return node;
     if (a[x][y]!=prevC)
     {
-        color.insert(a[x][y]);
+        //color.insert(a[x][y]);
+
+        region tmp2;
+        tmp2=find_tile(tmp2, x, y, a[x][y]);
+
+
         return node;
     }
 
@@ -46,12 +57,14 @@ region find_tile(region &node,set<int>&color, int x, int y, int prevC)
     if(b==true)return node;
 
     node.insert({x,y});
-    find_tile(node,color,x+1,y,prevC);
-    find_tile(node,color,x,y+1,prevC);
-    find_tile(node,color,x-1,y,prevC);
-    find_tile(node,color,x,y-1,prevC);
+    a[x][y]=-1;
+    find_tile(node,x+1,y,prevC);
+    find_tile(node,x,y+1,prevC);
+    find_tile(node,x-1,y,prevC);
+    find_tile(node,x,y-1,prevC);
 
 
+    nodeList.insert(node);
     return node;
 }
 
@@ -72,47 +85,109 @@ void color_region(region &node, int newC)
 int main()
 {
     //cout<<"asd";
-    size=4;
+    size=3;
     int move=0;
     create_table(size);
+    int copy[size][size];
+    for(int i=0;i<size;i++)
+    {
+         memcpy(copy[i],a[i],size*sizeof(a[0][0]));
+    }
+
+
 
     print_table(size);
-    region node;
+    region current_node;
+    //neighbor colors of current node
     set<int>color;
 
-    find_tile(node,color,0,0,a[0][0]);
+    find_tile(current_node,0,0,a[0][0]);
 
-    for(region ::iterator i=node.begin();i!=node.end();i++)
+    for(List::iterator i=nodeList.begin();i!=nodeList.end();i++)
     {
-        cout<<"x= "<<(*i)[0]<<" y="<<(*i)[1]<<"\n";
-    }
-    for(set<int>::iterator i=color.begin();i!=color.end();i++)
-    {
-        cout<<"color "<<*i<<" ";
-    }cout<<"\n";
-    while (true)
-    {
-        if(node.size()==size*size)break;
-        int input;
-        cin>>input;
-        if(color.find(input)==color.end())continue;
-        else cout<<"Yes\n";
-        color_region(node,input);
-        print_table(size);
-        color.clear();
-        node.clear();
-        find_tile(node,color,0,0,a[0][0]);
-
-
-        for(set<int>::iterator i=color.begin();i!=color.end();i++)
+        region a=*i;
+        for(region::iterator j=a.begin();j!=a.end();j++)
         {
-            cout<<"color "<<*i<<" ";
-        }cout<<"Moves: "<<++move<<"\n";
-
-
-
+            cout<<"x= "<<(*j)[0]<<" y="<<(*j)[1]<<"\n";
+        }cout<<"\n\n";
     }
+    cout<<nodeList.size();
+
+
+//    for(region::iterator j=current_node.begin();j!=current_node.end();j++)
+//                {
+//                    cout<<"x= "<<(*j)[0]<<" y="<<(*j)[1]<<"\n";
+//                }
+
+
+//    for(int i=0; i<size; i++)
+//        {
+//            for(int j=0; j<size; j++)
+//            {
+//                cout<<copy[i][j]<<" ";
+//            }
+//            cout<<"\n";
+//        }
 
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    for(List ::iterator i=AdjList.begin();i!=AdjList.end();i++ )
+//    {
+//        region a=i->first;
+//        for(region::iterator i=a.begin();i!=a.end();i++)
+//        {
+//            cout<<"x= "<<(*i)[0]<<" y="<<(*i)[1]<<"\n";
+//        }
+//        cout<<"Adj\n";
+//        list<region> b=i->second;
+//        for(list<region>::iterator i=b.begin();i!=b.end();i++)
+//        {
+//            region c=*i;
+//            for(region::iterator j=a.begin();j!=a.end();j++)
+//            {
+//                cout<<"x= "<<(*j)[0]<<" y="<<(*j)[1]<<"\n";
+//            }
+
+
+//        }
+
+//    }
+
+
+//for(List ::iterator i=AdjList.begin();i!=AdjList.end();i++ )
+//{
+//    region a=i->first;
+//    for(region::iterator i=a.begin();i!=a.end();i++)
+//    {
+//        cout<<"x= "<<(*i)[0]<<" y="<<(*i)[1]<<" "<<copy[(*i)[0]][(*i)[1]]<<"\n";
+//    }
+//    cout<<"Adj\n";
+//    list<region> b=i->second;
+//    for(list<region>::iterator j=b.begin();j!=b.end();j++)
+//    {
+//        region c=*j;
+//        for(region::iterator k=c.begin();k!=c.end();k++)
+//        {
+//            cout<<"x= "<<(*k)[0]<<" y="<<(*k)[1]<<" "<<copy[(*k)[0]][(*k)[1]]<<"\n";
+//        }
+
+
+//    }cout<<"end\n\n";
+
+//}
