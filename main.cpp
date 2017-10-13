@@ -3,6 +3,7 @@ using namespace std;
 
 typedef   set<array<int,2>> region;
 typedef set<region> List;
+typedef map<region,set<region>> AdjList;
 
 
 
@@ -41,13 +42,9 @@ region find_tile(region &node, int x, int y, int prevC)
     //cout<<x<<" "<<y<<"\n";
 
 
-    if (x < 0 || x >= size || y < 0 || y >= size || a[x][y]==-1)return node;
+    if (x < 0 || x >= size || y < 0 || y >= size )return node;
     if (a[x][y]!=prevC)
     {
-        //color.insert(a[x][y]);
-
-        region tmp2;
-        tmp2=find_tile(tmp2, x, y, a[x][y]);
 
 
         return node;
@@ -57,14 +54,14 @@ region find_tile(region &node, int x, int y, int prevC)
     if(b==true)return node;
 
     node.insert({x,y});
-    a[x][y]=-1;
+
     find_tile(node,x+1,y,prevC);
     find_tile(node,x,y+1,prevC);
     find_tile(node,x-1,y,prevC);
     find_tile(node,x,y-1,prevC);
 
 
-    nodeList.insert(node);
+
     return node;
 }
 
@@ -85,7 +82,7 @@ void color_region(region &node, int newC)
 int main()
 {
     //cout<<"asd";
-    size=3;
+    size=5;
     int move=0;
     create_table(size);
     int copy[size][size];
@@ -101,17 +98,25 @@ int main()
     //neighbor colors of current node
     set<int>color;
 
-    find_tile(current_node,0,0,a[0][0]);
+    for(int i=0;i<size;i++)
+    {
+        for(int j=0;j<size;j++)
+        {
+            current_node.clear();
+            find_tile(current_node,i,j,a[i][j]);
+            nodeList.insert(current_node);
+        }
+    }
 
     for(List::iterator i=nodeList.begin();i!=nodeList.end();i++)
     {
-        region a=*i;
-        for(region::iterator j=a.begin();j!=a.end();j++)
+        region r=*i;
+        for(region::iterator j=r.begin();j!=r.end();j++)
         {
-            cout<<"x= "<<(*j)[0]<<" y="<<(*j)[1]<<"\n";
+            cout<<"x= "<<(*j)[0]<<" y="<<(*j)[1]<<" "<<copy[(*j)[0]][(*j)[1]]<<"\n";
         }cout<<"\n\n";
     }
-    cout<<nodeList.size();
+    cout<<nodeList.size()<<"\n";
 
 
 //    for(region::iterator j=current_node.begin();j!=current_node.end();j++)
@@ -120,14 +125,14 @@ int main()
 //                }
 
 
-//    for(int i=0; i<size; i++)
-//        {
-//            for(int j=0; j<size; j++)
-//            {
-//                cout<<copy[i][j]<<" ";
-//            }
-//            cout<<"\n";
-//        }
+    for(int i=0; i<size; i++)
+        {
+            for(int j=0; j<size; j++)
+            {
+                cout<<a[i][j]<<" ";
+            }
+            cout<<"\n";
+        }
 
 
 
