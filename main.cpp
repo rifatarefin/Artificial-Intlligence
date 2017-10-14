@@ -4,12 +4,32 @@ using namespace std;
 typedef   set<array<int,2>> region;
 typedef set<region> List;
 typedef map<region,set<region>> AdjList;
+typedef vector<vector<int>> Grid;
 
 
-
+AdjList adj;
 List nodeList;
 int **a;
 int size;
+map<Grid,Grid> came_from;
+
+struct Node
+{
+    region r;
+    int gx;
+    double fx;
+};
+
+
+
+bool operator<(const Node& a, const Node& b)
+{
+    return a.gx>b.gx;
+}
+
+priority_queue<Node>opened_set;
+List closed_set;
+
 
 void create_table(int size)
 {
@@ -65,18 +85,109 @@ region find_tile(region &node, int x, int y, int prevC)
     return node;
 }
 
-void color_region(region &node, int newC)
-
+void find_adjacent(region node)
 {
     for(region ::iterator i=node.begin();i!=node.end();i++)
 
     {
         int x=(*i)[0];
         int y=(*i)[1];
-        a[x][y]=newC;
+
+        for(List::iterator j=nodeList.begin();j!=nodeList.end();j++)
+        {
+            region r=*j;
+            if(node==r)continue;
+
+
+            region::iterator itr=r.find({x+1,y});
+
+            if(itr!=r.end())
+            {
+                adj[node].insert(r);
+                adj[r].insert(node);
+            }
+
+            itr=r.find({x,y+1});
+
+            if(itr!=r.end())
+            {
+                adj[node].insert(r);
+                adj[r].insert(node);
+            }
+
+            itr=r.find({x-1,y});
+
+            if(itr!=r.end())
+            {
+                adj[node].insert(r);
+                adj[r].insert(node);
+            }
+
+            itr=r.find({x,y-1});
+
+            if(itr!=r.end())
+            {
+                adj[node].insert(r);
+                adj[r].insert(node);
+            }
+        }
+
     }
 
 }
+
+double heuristic(region node)
+{
+    int s=0;
+    for(region ::iterator i=node.begin();i!=node.end();i++)
+
+    {
+        int x=(*i)[0];
+        int y=(*i)[1];
+        s+=size-1-x+size-1-y;
+    }
+    return s/node.size();
+}
+
+void a_star()
+{
+
+    region r;
+    r=find_tile(r,0,0,a[0][0]);
+    Node start;
+    start.r=r;
+    start.gx=0;
+    start.fx=heuristic(r);
+    opened_set.push(start);
+
+    vector<vector<int>>v;
+    for(int i=0;i<size;i++)
+    {
+        v.push_back(vector<int>(a[i],a[i]+size));
+    }
+    came_from[v]=v;
+    while (opened_set.size()!=0) {
+
+        Node current=opened_set.top();
+        opened_set.pop();
+        //if goal
+        
+        region r=current.r;
+        List nbs=adj[r];
+        for(List::iterator i=nbs.begin();i!=nbs.end();i++)
+        {
+            region nr=*i;
+            Node nb;
+            nb.r=nr;
+            int tgx=current.gx+1;
+            
+        }
+        
+
+    }
+
+}
+
 
 
 int main()
@@ -111,12 +222,51 @@ int main()
     for(List::iterator i=nodeList.begin();i!=nodeList.end();i++)
     {
         region r=*i;
+        find_adjacent(r);
+//        for(region::iterator j=r.begin();j!=r.end();j++)
+//        {
+//            cout<<"x= "<<(*j)[0]<<" y="<<(*j)[1]<<" "<<copy[(*j)[0]][(*j)[1]]<<"\n";
+//        }cout<<"\n\n";
+    }
+    cout<<nodeList.size()<<"\n\n";
+
+    for(AdjList::iterator i=adj.begin();i!=adj.end();i++)
+    {
+        region r=i->first;
         for(region::iterator j=r.begin();j!=r.end();j++)
         {
-            cout<<"x= "<<(*j)[0]<<" y="<<(*j)[1]<<" "<<copy[(*j)[0]][(*j)[1]]<<"\n";
-        }cout<<"\n\n";
+            cout<<"x= "<<(*j)[0]<<" y="<<(*j)[1]<<" "<<a[(*j)[0]][(*j)[1]]<<"\n";
+        }cout<<"\n\nAdjacent\n";
+
+        List ls=i->second;
+
+        for(List::iterator k=ls.begin();k!=ls.end();k++)
+        {
+            region r=*k;
+            for(region::iterator j=r.begin();j!=r.end();j++)
+            {
+                cout<<"x= "<<(*j)[0]<<" y="<<(*j)[1]<<" "<<a[(*j)[0]][(*j)[1]]<<"\n";
+            }
+        }cout<<"end\n";
+
     }
-    cout<<nodeList.size()<<"\n";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //    for(region::iterator j=current_node.begin();j!=current_node.end();j++)
@@ -125,14 +275,14 @@ int main()
 //                }
 
 
-    for(int i=0; i<size; i++)
-        {
-            for(int j=0; j<size; j++)
-            {
-                cout<<a[i][j]<<" ";
-            }
-            cout<<"\n";
-        }
+//    for(int i=0; i<size; i++)
+//        {
+//            for(int j=0; j<size; j++)
+//            {
+//                cout<<a[i][j]<<" ";
+//            }
+//            cout<<"\n";
+//        }
 
 
 
@@ -140,7 +290,18 @@ int main()
 
 
 
+//void color_region(region &node, int newC)
 
+//{
+//    for(region ::iterator i=node.begin();i!=node.end();i++)
+
+//    {
+//        int x=(*i)[0];
+//        int y=(*i)[1];
+//        a[x][y]=newC;
+//    }
+
+//}
 
 
 
